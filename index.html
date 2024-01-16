@@ -147,7 +147,7 @@
   let defaultSongs = JSON.parse(localStorage.getItem('defaultSongs')) // 默认歌单
   let current // 抽中数据下标
   let interval // 定时器
-  let maxTimes = 1 // 随机次数
+  let maxTimes = 10 // 随机次数
   window.onload = function () {
     init()
     createNameElement()
