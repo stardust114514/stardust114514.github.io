@@ -5,244 +5,296 @@
 -->
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>祁七七今天唱什么</title>
-  </head>
-  <style>
-    * {
-      padding: 0;
-      margin: 0;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>祁七七今天唱什么</title>
+</head>
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+  }
+
+  .root {
+    width: 100%;
+  }
+
+  .btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    text-align: center;
+    line-height: 1;
+    font-size: 14px;
+    color: #fff;
+    background-color: #306ef5;
+    border-radius: 4px;
+    border: none;
+    margin: 5px;
+  }
+
+  .btn-second {
+    color: #306ef5;
+    background-color: #fff;
+    border: 1px solid #306ef5;
+  }
+
+  button:hover {
+    opacity: 0.8 !important;
+  }
+
+  button:focus {
+    outline: none !important;
+  }
+
+  .name-container {
+    margin: 50px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .name {
+    padding: 10px 20px;
+    text-align: center;
+    line-height: 1;
+    font-size: 14px;
+    box-shadow: #ccc 0px 0px 5px;
+    border-radius: 3px;
+    color: #656d78;
+    margin: 5px;
+  }
+
+  .name-active {
+    background-color: #ff4d4f;
+    box-shadow: none;
+    color: #fff;
+  }
+
+  .mask {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .dialog {
+    width: 0;
+    height: 0;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 20px 40px;
+    padding-top: 0;
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+
+  .mask-show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: all 0.3s;
+  }
+
+  .dialog-show {
+    width: 500px;
+    height: 400px;
+    transition: all 0.2s;
+  }
+
+  .title {
+    font-weight: bold;
+    text-align: center;
+    font-size: 20px;
+    line-height: 70px;
+  }
+
+  #names {
+    width: 100%;
+    height: 280px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .form-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 50px;
+  }
+
+  .result-text {
+    font-size: 80px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 280px;
+  }
+</style>
+<script>
+  let defaultSongs = JSON.parse(localStorage.getItem('defaultSongs')) // 默认歌单
+  let current // 抽中数据下标
+  let interval // 定时器
+  let maxTimes = 1 // 随机次数
+  window.onload = function () {
+    init()
+    createNameElement()
+  }
+
+  // 初始化默认歌单和自定义歌单
+  async function init() {
+    let xhr = new XMLHttpRequest()
+    xhr.open('GET', 'songs.json', false)
+    xhr.send()
+    if (xhr.status === 200) {
+      defaultSongs = JSON.parse(xhr.responseText)
+    } else {
+      defaultSongs = ['获取默认歌单失败']
     }
-    .root {
-      width: 100%;
+    localStorage.setItem('defaultSongs', JSON.stringify(defaultSongs))
+    getInputSongs()
+  }
+
+  // 获取自定义歌单
+  function getInputSongs() {
+    let inputSongs = JSON.parse(localStorage.getItem('inputSongs'))
+    if (!inputSongs) {
+      inputSongs = defaultSongs
+      localStorage.setItem('inputSongs', JSON.stringify(inputSongs))
     }
-    .btn-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 50px;
-    }
-    .btn {
-      padding: 10px 20px;
-      text-align: center;
-      line-height: 1;
-      font-size: 14px;
-      color: #fff;
-      background-color: #306ef5;
-      border-radius: 4px;
-      border: none;
-      margin: 5px;
-    }
-    .btn-second {
-      color: #306ef5;
-      background-color: #fff;
-      border: 1px solid #306ef5;
-    }
-    button:hover {
-      opacity: 0.8 !important;
-    }
-    button:focus {
-      outline: none !important;
-    }
-    .name-container {
-      margin: 50px;
-      display: flex;
-      flex-wrap: wrap;
-    }
-    .name {
-      padding: 10px 20px;
-      text-align: center;
-      line-height: 1;
-      font-size: 14px;
-      box-shadow: #ccc 0px 0px 5px;
-      border-radius: 3px;
-      color: #656d78;
-      margin: 5px;
-    }
-    .name-active {
-      background-color: #ff4d4f;
-      box-shadow: none;
-      color: #fff;
-    }
-    .mask {
-      width: 100vw;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      left: 0;
-      top: 0;
-      visibility: hidden;
-      opacity: 0;
-      transition: all 0.3s;
-    }
-    .dialog {
-      width: 0;
-      height: 0;
-      background-color: #fff;
-      border-radius: 4px;
-      padding: 20px 40px;
-      padding-top: 0;
-      transition: all 0.2s;
-      overflow: hidden;
-    }
-    .mask-show {
-      opacity: 1 !important;
-      visibility: visible !important;
-      transition: all 0.3s;
-    }
-    .dialog-show {
-      width: 500px;
-      height: 400px;
-      transition: all 0.2s;
-    }
-    .title {
-      font-weight: bold;
-      text-align: center;
-      font-size: 20px;
-      line-height: 70px;
-    }
-    #names {
-      width: 100%;
-      height: 280px;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    .form-btn-container {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      height: 50px;
-    }
-    .result-text {
-      font-size: 80px;
-      font-weight: bold;
-      text-align: center;
-      line-height: 280px;
-    }
-  </style>
-  <script>
-    let current // 抽中数据下标
-    let timeout // 定时器
-    let interval
-    window.onload = function () {
-      createNameElement()
-    }
-    // 打开/关闭弹窗
-    function toogleDialog(id, visible) {
-      if (interval) return
-      let mask = document.getElementById(id + '-mask')
-      let dialog = document.getElementById(id + '-dialog')
-      if (visible) {
-        mask.className = 'mask mask-show'
-        dialog.className = 'dialog dialog-show'
-        if (id === 'input') {
-          let names = document.getElementById('names')
-          let storage = localStorage.getItem('namesString')
-          if (storage) {
-            names.value = JSON.parse(storage)
-          }
-        }
-      } else {
-        mask.className = 'mask'
-        dialog.className = 'dialog'
+    return inputSongs
+  }
+
+  // 打开/关闭弹窗
+  function toggleDialog(id, visible) {
+    if (interval) return
+    const mask = document.getElementById(id + '-mask')
+    const dialog = document.getElementById(id + '-dialog')
+    if (visible) {
+      mask.className = 'mask mask-show'
+      dialog.className = 'dialog dialog-show'
+      if (id === 'input') {
+        let names = document.getElementById('names')
+        let inputSongs = getInputSongs()
+        names.value = inputSongs.join('\n')
       }
+    } else {
+      mask.className = 'mask'
+      dialog.className = 'dialog'
     }
-    // 录入数据确认
-    function confirm() {
-      let value = document.getElementById('names').value
-      if (typeof Storage !== 'undefined') {
-        localStorage.setItem('namesString', JSON.stringify("小星星\n修炼爱情\n霓虹旅店\n淋雨一直走\n离心力\n七上八下\n恋爱告急\n呼吸决定\n一路之下\n易燃易爆炸\n那一夜\n梦的光点\n战争世界\n想自由\n宝贝\n失格\n摩天动物园\n忘了我\n破茧\n晴天\n夜空中最亮的星\n红色高跟鞋\n明明就\n回忆的沙漏\n就是爱\n一笑倾城\n小城夏天\n让世界暂停一分钟\n水星记\n放手\n风月\n月亮惹的祸\n凄美地\n房间\n魔鬼中的天使\n星辰大海\n星河水手\n小幸运\n下女的圣经\n要抱抱\n生日快乐歌\n骑士精神\n像鱼\n不值得\n神武雨霖铃\n黏黏黏黏\n伏特加\n尘埃\n喂\n如此\n脑公\n曾经的你们\n爱与妒忌\n光的方向\n你的微笑\n最美的期待\n梦里花\n分手快乐\n很久以后\n爱你（邓紫棋）\n有一种悲伤\n煎熬\n心电心\n独占神话\n暖暖\n怎么了\n失眠飞行\n睫毛弯弯\n红蔷薇白玫瑰\n差不多\nme&you\n平行世界\n给你一瓶魔法药水\n缘分一道桥\n至少还有你\n浪费\n停格\n昨日青空\n你就不要想起我\n浪漫血液\n阴天\n简单爱\nHELL\n被驯服的象\n大火\n左边\ntik tok bady\n奇迹\n只有我和你的地方\n爱你\n我说了算\n我发现你\n天空没有极限\n屋顶着火\n龙卷风\n不怕\n我好想你\n尽头\n红玫瑰\n18db\n夏天的风\n棉花糖\n小棋童\n读自\nback again\n不一样又怎样\n傻呆呆\n在夜里跳舞\n爱的魔法\n匆匆那年\n红昭愿\n透明\n你不能这样对我\n受难曲\n刻在我心底的名字\n醉\n天使的执着\n岁月神偷\n美人鱼\n刀马旦\n你不要这样对我\n雨蝶\n那时窗外开满花\n单身情歌\n泡沫\n我\n栅栏间隙偷窥你\n不分手的恋爱\n芳草地\nhell\n陪我去流浪\n盲点\n暗香\n年轮\nfly away\n写完我们的姓名\n千纸鹤\n玫瑰少年\n微微\n人质\n猜不透\n可爱女人\n我想你了\n当你\n你是倒影的微星\n有点甜\n撒野\n走马\n我们的爱\n多远都要在一起\n气象站台\n你不是第一个离开的人\n倒带\n云与海\n决爱\n画\n舞娘\n沦陷\n岩石里的花\n画心\n说爱你\n小小\n千年之恋\n爱的天灵灵\n情花\n保留\n星月神话\n香水有毒\n阿拉斯加海湾\n小半\n慢冷\n总有个人\n坏蛋\n雨爱\n空港\n后退\n坠落星空\n月光\n我怀念的\n我管你\n大家一起喜洋洋\n复仇者\n终点\n光亮\ntiktok bady\n对你有点失望\n海海海\nI don't know\n彩虹\n超能力\n好想好想你\n大鱼\n火\n不可思议\n天使的偏执\n人是_\n讲真的\n城市秘闻\n你走\n下一个天亮\n难受曲\n分身\ni don't know\n日不落\n她看不见\n失控\n母系社会\nyou got me\n不想回家\n句号\n把我拥抱\n那时窗外开的花\n若梦\n单行的轨道\n给我一个理由忘记\n错错错\n引路的风筝\n小手拉大手\n小镇姑娘\n孤独\n差不多姑娘\n没有意外\n算什么男人\n幸福了 然后呢\n午夜恰恰\n橘子\n大眠\n寻\n月牙湾\n好不容易\n错位时空\n美丽的神话\n空空如也\n大叔不要跑\n年轮说\n悬\n18dB\n他看不见\n笼\n连名带姓\n不醉不会\n我的梦\n想对现在告别\n情人\n你是倒映的微星\n永不失联的爱\n这陌生的刚好\n唯一\n湿了分寸\n左手右手\n飞鸟和蝉\n芥末巧克力\n爱笑的眼睛\n谢谢你的路过\n电台情歌\n一个人想着一个人\n马德里不思议\n隐形的翅膀\n九张机\n奢香夫人\n等下一个他\n大艺术家\n漂亮男孩\ntiktok body\n我不配\n小哪吒\n宁夏\n达尔文\n虚拟\n嗨嗨嗨\n马赛克\n被驯化的象\n这次你真的走了\n痒\n红豆\n花月成双\n漂洋过海来看你\n外婆桥\n心如止水\n哭笑不得\n失了分寸\n霓虹\n告白气球\n放空\n我的秘密\n特务J\n陌生的刚好\n是否\n孤勇者\n犯贱\n左手指月\n第三人称\n无双的王者\n血腥爱情故事\n11\n太\n危险派对\n发如雪\n等下一个她\n天空之外\nEl Hombre que Ríe\n如愿\n再见\n光年之外\n相对现在告别\n稻香\n空心\n果汁分你一半\nchina\n风情万种\n"))
-        createNameElement()
-      } else {
-        alert('对不起，您的浏览器不支持 web 存储。')
-      }
-      toogleDialog('input', false)
+  }
+
+  // 录入数据确认
+  function confirm() {
+    let value = document.getElementById('names').value
+    if (!value || !value.trim()) {
+      localStorage.setItem('inputSongs', JSON.stringify(defaultSongs))
+    } else {
+      localStorage.setItem('inputSongs', JSON.stringify(value.split('\n')))
     }
-    // 生成名单数据
-    function createNameElement() {
-      let storage = localStorage.getItem('namesString')
-      if (!storage) return
-      let namasString = JSON.parse(storage)
-      let nameList = namasString.split('\n').filter(item => item.trim())
-      let nameDom = document.getElementById('name-container')
-      let len = nameDom.childNodes.length
-      for (let i = 0; i < len; i++) {
-        nameDom.removeChild(nameDom.childNodes[0])
-      }
-      nameList.forEach((item, index) => {
-        let node = document.createElement('span')
-        node.className = 'name'
-        node.id = 'name' + index
-        let textnode = document.createTextNode(item)
-        node.appendChild(textnode)
-        nameDom.appendChild(node)
-      })
+    createNameElement()
+    toggleDialog('input', false)
+  }
+
+  // 重置歌单为默认
+  function resetSongs() {
+    localStorage.removeItem('inputSongs')
+    document.getElementById('names').value = getInputSongs().join('\n')
+    confirm()
+  }
+
+  // 生成名单数据
+  function createNameElement() {
+    const inputSongs = getInputSongs()
+    if (!inputSongs) return
+    let nameList = inputSongs.filter(item => item.trim())
+    let nameDom = document.getElementById('name-container')
+    let len = nameDom.childNodes.length
+    for (let i = 0; i < len; i++) {
+      nameDom.removeChild(nameDom.childNodes[0])
     }
-    // 开始抽选
-    function start() {
-      if (interval) return
-      let storage = localStorage.getItem('namesString')
-      if (!storage) return
-      let namasString = JSON.parse(storage)
-      let nameList = namasString.split('\n').filter(item => item.trim())
-      let len = nameList.length
-      interval = setInterval(function () {
-        let random = RandomNumBoth(0, len - 1)
-        let oldDom = document.getElementById('name' + current)
-        if (oldDom) {
-          oldDom.className = 'name'
-        }
-        current = random
-        let newDom = document.getElementById('name' + random)
-        if (newDom) {
-          newDom.className = 'name name-active'
-        }
-      }, 250)
-      clearTimeout(timeout)
-      timeout = setTimeout(function () {
+    nameList.forEach(item => {
+      let node = document.createElement('span')
+      node.className = 'name'
+      let textNode = document.createTextNode(item)
+      node.appendChild(textNode)
+      nameDom.appendChild(node)
+    })
+  }
+
+  // 开始抽选
+  function start() {
+    if (interval) return
+    const inputSongs = getInputSongs()
+    let nameList = inputSongs.filter(item => item.trim())
+    let len = nameList.length
+    let times = 1
+    const parent = document.getElementById('name-container')
+    const resultDom = document.getElementById('result-text')
+    interval = setInterval(function () {
+      if (times++ > maxTimes) {
         clearInterval(interval)
         interval = null
-        let resultDom = document.getElementById('result-text')
         resultDom.innerText = nameList[current]
-        toogleDialog('result', true)
-      }, 10000)
-    }
-    // 生成随机数
-    function RandomNumBoth(min, max) {
-      return min + Math.round(Math.random() * (max - min))
-    }
-  </script>
-  <body>
-    <div class="root">
-      <div class="btn-container">
-        <button class="btn" type="button" onclick="start()">祁七七今天唱什么</button>
-        <button class="btn btn-second" type="button" onclick="toogleDialog('input', true)">先点我</button>
-      </div>
-      <div class="name-container" id="name-container"></div>
+        toggleDialog('result', true)
+        return
+      }
+      if (parent.children[current]) {
+        parent.children[current].className = 'name'
+      }
+      current = RandomNumBoth(0, len - 1)
+      if (parent.children[current]) {
+        parent.children[current].className = 'name name-active'
+      }
+    }, 250)
+  }
+
+  // 生成随机数
+  function RandomNumBoth(min, max) {
+    return min + Math.round(Math.random() * (max - min))
+  }
+</script>
+
+<body>
+  <div class="root">
+    <div class="btn-container">
+      <button class="btn" type="button" onclick="start()">祁七七今天唱什么</button>
+      <button class="btn btn-second" type="button" onclick="toggleDialog('input', true)">点我修改歌单</button>
     </div>
-    <div class="mask" id="input-mask">
-      <div class="dialog" id="input-dialog">
-        <div class="title">祁七七今天唱什么</div>
-        <textarea name="names" id="names" cols="5" rows="10" placeholder="祁七七"></textarea>
-        <div class="form-btn-container">
-          <button class="btn" type="button" onclick="confirm()">点确定哦</button>
-          <button class="btn btn-second" type="button" onclick="toogleDialog('input', false)">关闭</button>
-        </div>
+    <div class="name-container" id="name-container"></div>
+  </div>
+  <div class="mask" id="input-mask">
+    <div class="dialog" id="input-dialog">
+      <div class="title">祁七七今天唱什么</div>
+      <textarea name="names" id="names" cols="5" rows="10" placeholder="祁七七"></textarea>
+      <div class="form-btn-container">
+        <button class="btn" type="button" onclick="confirm()">点确定哦</button>
+        <button class="btn" type="button" onclick="resetSongs()">重置歌单</button>
+        <button class="btn btn-second" type="button" onclick="toggleDialog('input', false)">关闭</button>
       </div>
     </div>
-    <div class="mask" id="result-mask">
-      <div class="dialog" id="result-dialog">
-        <div class="title">祁七七今天唱</div>
-        <div class="result-text" id="result-text"></div>
-        <div class="form-btn-container">
-          <button class="btn btn-second" type="button" onclick="toogleDialog('result', false)">关闭</button>
-        </div>
+  </div>
+  <div class="mask" id="result-mask">
+    <div class="dialog" id="result-dialog">
+      <div class="title">祁七七今天唱</div>
+      <div class="result-text" id="result-text"></div>
+      <div class="form-btn-container">
+        <button class="btn btn-second" type="button" onclick="toggleDialog('result', false)">关闭</button>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
