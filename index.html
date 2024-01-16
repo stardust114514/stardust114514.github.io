@@ -1,8 +1,250 @@
-<p>Hello 大家好</p>
-<p>我是霸都丶傲天，这是我的个人网站。 </p>
-<p>很高兴你来到这里, 你可以在以下的网站找到我</p>
-
-<ul>
-  <li> <a href="https://www.zhihu.com/people/AJLoveChina">知乎</a> </li>
-  <li> <a href="http://hejie.nigeerhuo.com">我的博客(已经不更细了,现在在知乎写文章)</a> </li>
-</ul>
+<!--
+ * @Author: hjh
+ * @Date: 2021-03-30 17:33:31
+ * @Description: 随机点名
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>随机点名</title>
+  </head>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    .root {
+      width: 100%;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+    .btn {
+      padding: 10px 20px;
+      text-align: center;
+      line-height: 1;
+      font-size: 14px;
+      color: #fff;
+      background-color: #306ef5;
+      border-radius: 4px;
+      border: none;
+      margin: 5px;
+    }
+    .btn-second {
+      color: #306ef5;
+      background-color: #fff;
+      border: 1px solid #306ef5;
+    }
+    button:hover {
+      opacity: 0.8 !important;
+    }
+    button:focus {
+      outline: none !important;
+    }
+    .name-container {
+      margin: 50px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .name {
+      padding: 10px 20px;
+      text-align: center;
+      line-height: 1;
+      font-size: 14px;
+      box-shadow: #ccc 0px 0px 5px;
+      border-radius: 3px;
+      color: #656d78;
+      margin: 5px;
+    }
+    .name-active {
+      background-color: #ff4d4f;
+      box-shadow: none;
+      color: #fff;
+    }
+    .mask {
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      left: 0;
+      top: 0;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .dialog {
+      width: 0;
+      height: 0;
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 20px 40px;
+      padding-top: 0;
+      transition: all 0.2s;
+      overflow: hidden;
+    }
+    .mask-show {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: all 0.3s;
+    }
+    .dialog-show {
+      width: 500px;
+      height: 400px;
+      transition: all 0.2s;
+    }
+    .title {
+      font-weight: bold;
+      text-align: center;
+      font-size: 20px;
+      line-height: 70px;
+    }
+    #names {
+      width: 100%;
+      height: 280px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .form-btn-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      height: 50px;
+    }
+    .result-text {
+      font-size: 80px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 280px;
+    }
+  </style>
+  <script>
+    let current // 抽中数据下标
+    let timeout // 定时器
+    let interval
+    window.onload = function () {
+      createNameElement()
+    }
+    // 打开/关闭弹窗
+    function toogleDialog(id, visible) {
+      if (interval) return
+      let mask = document.getElementById(id + '-mask')
+      let dialog = document.getElementById(id + '-dialog')
+      if (visible) {
+        mask.className = 'mask mask-show'
+        dialog.className = 'dialog dialog-show'
+        if (id === 'input') {
+          let names = document.getElementById('names')
+          let storage = localStorage.getItem('namesString')
+          if (storage) {
+            names.value = JSON.parse(storage)
+          }
+        }
+      } else {
+        mask.className = 'mask'
+        dialog.className = 'dialog'
+      }
+    }
+    // 录入数据确认
+    function confirm() {
+      let value = document.getElementById('names').value
+      if (typeof Storage !== 'undefined') {
+        localStorage.setItem('namesString', JSON.stringify(value))
+        createNameElement()
+      } else {
+        alert('对不起，您的浏览器不支持 web 存储。')
+      }
+      toogleDialog('input', false)
+    }
+    // 生成名单数据
+    function createNameElement() {
+      let storage = localStorage.getItem('namesString')
+      if (!storage) return
+      let namasString = JSON.parse(storage)
+      let nameList = namasString.split('\n').filter(item => item.trim())
+      let nameDom = document.getElementById('name-container')
+      let len = nameDom.childNodes.length
+      for (let i = 0; i < len; i++) {
+        nameDom.removeChild(nameDom.childNodes[0])
+      }
+      nameList.forEach((item, index) => {
+        let node = document.createElement('span')
+        node.className = 'name'
+        node.id = 'name' + index
+        let textnode = document.createTextNode(item)
+        node.appendChild(textnode)
+        nameDom.appendChild(node)
+      })
+    }
+    // 开始抽选
+    function start() {
+      if (interval) return
+      let storage = localStorage.getItem('namesString')
+      if (!storage) return
+      let namasString = JSON.parse(storage)
+      let nameList = namasString.split('\n').filter(item => item.trim())
+      let len = nameList.length
+      interval = setInterval(function () {
+        let random = RandomNumBoth(0, len - 1)
+        let oldDom = document.getElementById('name' + current)
+        if (oldDom) {
+          oldDom.className = 'name'
+        }
+        current = random
+        let newDom = document.getElementById('name' + random)
+        if (newDom) {
+          newDom.className = 'name name-active'
+        }
+      }, 250)
+      clearTimeout(timeout)
+      timeout = setTimeout(function () {
+        clearInterval(interval)
+        interval = null
+        let resultDom = document.getElementById('result-text')
+        resultDom.innerText = nameList[current]
+        toogleDialog('result', true)
+      }, 10000)
+    }
+    // 生成随机数
+    function RandomNumBoth(min, max) {
+      return min + Math.round(Math.random() * (max - min))
+    }
+  </script>
+  <body>
+    <div class="root">
+      <div class="btn-container">
+        <button class="btn" type="button" onclick="start()">开始抽选</button>
+        <button class="btn btn-second" type="button" onclick="toogleDialog('input', true)">录入数据</button>
+      </div>
+      <div class="name-container" id="name-container"></div>
+    </div>
+    <div class="mask" id="input-mask">
+      <div class="dialog" id="input-dialog">
+        <div class="title">卢本伟
+        张三
+        李四</div>
+        <textarea name="names" id="names" cols="5" rows="10" placeholder="李四"></textarea>
+        <div class="form-btn-container">
+          <button class="btn" type="button" onclick="confirm()">确定</button>
+          <button class="btn btn-second" type="button" onclick="toogleDialog('input', false)">关闭</button>
+        </div>
+      </div>
+    </div>
+    <div class="mask" id="result-mask">
+      <div class="dialog" id="result-dialog">
+        <div class="title">天选之子</div>
+        <div class="result-text" id="result-text"></div>
+        <div class="form-btn-container">
+          <button class="btn btn-second" type="button" onclick="toogleDialog('result', false)">关闭</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
