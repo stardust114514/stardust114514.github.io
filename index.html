@@ -286,6 +286,12 @@
   function RandomNumBoth(min, max) {
     return min + Math.round(Math.random() * (max - min))
   }
+
+  // 复制
+  function copy() {
+    const resultDom = document.getElementById('result-text')
+    navigator.clipboard.writeText(resultDom.innerText)
+  }
 </script>
 
 <body>
@@ -314,6 +320,7 @@
         <div class="result-text" id="result-text"></div>
       </div>
       <div class="form-btn-container">
+        <button class="btn" type="button" onclick="copy()">复制歌名</button>
         <button class="btn btn-second" type="button" onclick="toggleDialog('result', false)">关闭</button>
       </div>
     </div>
