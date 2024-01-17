@@ -10,6 +10,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <title>祁七七今天唱什么</title>
 </head>
 <style>
@@ -112,7 +113,8 @@
     padding: 20px 40px;
     padding-top: 0;
     transition: all 0.2s;
-    overflow: hidden;
+    white-space: nowrap;
+    overflow-x: hidden;
   }
 
   .mask-show {
@@ -148,11 +150,17 @@
     height: 50px;
   }
 
+  .scroll-container {
+    overflow: hidden;
+  }
+
   .result-text {
+    margin-bottom: -20px;
     font-size: 80px;
     font-weight: bold;
     text-align: center;
     line-height: 280px;
+    overflow-x: scroll;
   }
 </style>
 <script>
@@ -278,6 +286,12 @@
   function RandomNumBoth(min, max) {
     return min + Math.round(Math.random() * (max - min))
   }
+
+  // 复制
+  function copy() {
+    const resultDom = document.getElementById('result-text')
+    navigator.clipboard.writeText(resultDom.innerText)
+  }
 </script>
 
 <body>
@@ -302,8 +316,11 @@
   <div class="mask" id="result-mask">
     <div class="dialog" id="result-dialog">
       <div class="title">祁七七今天唱</div>
-      <div class="result-text" id="result-text"></div>
+      <div class="scroll-container">
+        <div class="result-text" id="result-text"></div>
+      </div>
       <div class="form-btn-container">
+        <button class="btn" type="button" onclick="copy()">复制歌名</button>
         <button class="btn btn-second" type="button" onclick="toggleDialog('result', false)">关闭</button>
       </div>
     </div>
